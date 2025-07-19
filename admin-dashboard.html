@@ -688,6 +688,10 @@
             document.body.appendChild(modal);
             const bootstrapModal = new bootstrap.Modal(modal);
             bootstrapModal.show();
+//             const bootstrapModal = new bootstrap.Modal(modal);
+// bootstrapModal.show();
+// modal.removeAttribute("aria-hidden"); // ✅ yeh add karo
+
 
             modal.addEventListener('hidden.bs.modal', () => {
                 document.body.removeChild(modal);
@@ -735,132 +739,138 @@
             }
         }
 // Add Management
-        function showAddAdModal() {
-        const modal = document.createElement('div');
-        modal.className = 'modal fade';
-        modal.innerHTML = `
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Add New Advertisement</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="addAdForm">
-                            <div class="mb-3">
-                                <label class="form-label">Ad Title</label>
-                                <input type="text" class="form-control" id="adTitle" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Ad Content/Text</label>
-                                <textarea class="form-control" id="adContent" rows="3" required></textarea>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Upload Ad Image</label>
-                                <input type="file" class="form-control" id="adImage" accept="image/*" required />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Ad URL (optional)</label>
-                                <input type="url" class="form-control" id="adUrl">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Status</label>
-                                <select class="form-control" id="adStatus">
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" onclick="addAd()">Add Advertisement</button>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-        const bootstrapModal = new bootstrap.Modal(modal);
-        bootstrapModal.show();
+        // Show Add Advertisement Modal
+  function showAddAdModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add New Advertisement</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="addAdForm">
+              <div class="mb-3">
+                <label class="form-label">Ad Title</label>
+                <input type="text" class="form-control" id="adTitle" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Ad Content/Text</label>
+                <textarea class="form-control" id="adContent" rows="3" required></textarea>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Upload Ad Image</label>
+                <input type="file" class="form-control" id="adImage" accept="image/*" required />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Ad URL (optional)</label>
+                <input type="url" class="form-control" id="adUrl">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Status</label>
+                <select class="form-control" id="adStatus">
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="addAd()">Add Advertisement</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    // const bootstrapModal = new bootstrap.Modal(modal);
+    // bootstrapModal.show();
+    const bootstrapModal = new bootstrap.Modal(modal);
+bootstrapModal.show();
+modal.removeAttribute("aria-hidden"); 
 
-        modal.addEventListener('hidden.bs.modal', () => {
-            document.body.removeChild(modal);
-        });
+
+    modal.addEventListener('hidden.bs.modal', () => {
+      document.body.removeChild(modal);
+    });
+  }
+
+  // Add Advertisement
+  function addAd() {
+    const title = document.getElementById('adTitle').value;
+    const content = document.getElementById('adContent').value;
+    const imageFile = document.getElementById('adImage').files[0];
+    const url = document.getElementById('adUrl').value;
+    const status = document.getElementById('adStatus').value;
+
+    if (!title || !content || !imageFile) {
+      alert('Please fill in all required fields.');
+      return;
     }
 
-    function addAd() {
-        const title = document.getElementById('adTitle').value;
-        const content = document.getElementById('adContent').value;
-        const imageFile = document.getElementById('adImage').files[0];
-        const url = document.getElementById('adUrl').value;
-        const status = document.getElementById('adStatus').value;
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const base64Image = e.target.result;
+      const ad = {
+        id: Date.now().toString(),
+        title,
+        content,
+        image: base64Image,
+        url,
+        status,
+        createdAt: new Date().toISOString()
+      };
 
-        if (!title || !content || !imageFile) {
-            alert('Please fill in all required fields.');
-            return;
-        }
+      const ads = JSON.parse(localStorage.getItem('ads')) || [];
+      ads.push(ad);
+      localStorage.setItem('ads', JSON.stringify(ads));
+      alert("Ad added!");
+      bootstrap.Modal.getInstance(document.querySelector('.modal')).hide();
+      loadAds();
+      displayActiveAd(); // <-- New Function Call
+    };
 
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const base64Image = e.target.result;
+    reader.readAsDataURL(imageFile);
+  }
 
-            const ad = {
-                id: Date.now().toString(),
-                title,
-                content,
-                image: base64Image,
-                url,
-                status,
-                createdAt: new Date().toISOString()
-            };
+  // Load Ads in Admin Table
+  function loadAds() {
+    const ads = JSON.parse(localStorage.getItem('ads')) || [];
+    const tbody = document.getElementById('adsTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
 
-            const ads = JSON.parse(localStorage.getItem('ads')) || [];
-            ads.push(ad);
-            localStorage.setItem('ads', JSON.stringify(ads));
-            alert("Ad added!");
-            bootstrap.Modal.getInstance(document.querySelector('.modal')).hide();
-            loadAds();
-        };
+    ads.forEach((ad, index) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${ad.id}</td>
+        <td>${ad.title}</td>
+        <td>${ad.content}</td>
+        <td>
+          <img src="${ad.image}" width="60" style="cursor: pointer;" onclick="previewImage('${ad.image}')"/>
+        </td>
+        <td><span class="badge bg-${ad.status === 'active' ? 'success' : 'secondary'}">${ad.status}</span></td>
+        <td>
+          <button onclick="showEditAdModal(${index})" class="btn btn-sm btn-warning">Edit</button>
+          <button onclick="deleteAd(${index})" class="btn btn-sm btn-danger">Delete</button>
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
 
-        reader.readAsDataURL(imageFile);
-    }
-
-    function loadAds() {
-        const ads = JSON.parse(localStorage.getItem('ads')) || [];
-        const tbody = document.getElementById('adsTableBody');
-        tbody.innerHTML = '';
-
-        ads.forEach((ad, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${ad.id}</td>
-                <td>${ad.title}</td>
-                <td>${ad.content}</td>
-                <td>
-                    <img src="${ad.image}" width="60" style="cursor: pointer;" onclick="previewImage('${ad.image}')"/>
-                </td>
-
-                <td><span class="badge bg-${ad.status === 'active' ? 'success' : 'secondary'}">${ad.status}</span></td>
-                <td>
-                    <button onclick="deleteAd(${index})" class="btn btn-sm btn-danger">Delete</button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
-    
-    function previewImage(imageSrc) {
+  // Show Preview Image
+  function previewImage(imageSrc) {
     const imgWindow = window.open('', '_blank');
     imgWindow.document.write(`<img src="${imageSrc}" style="max-width: 100%; height: auto;" />`);
-}
+  }
 
-   
-
-
-    function showEditAdModal(index) {
+  // Show Edit Modal
+  function showEditAdModal(index) {
     const ads = JSON.parse(localStorage.getItem('ads')) || [];
     const ad = ads[index];
-
     const modal = document.createElement('div');
     modal.className = 'modal fade';
     modal.innerHTML = `
@@ -906,8 +916,12 @@
       </div>
     `;
     document.body.appendChild(modal);
+    // const bootstrapModal = new bootstrap.Modal(modal);
+    // bootstrapModal.show();
     const bootstrapModal = new bootstrap.Modal(modal);
-    bootstrapModal.show();
+bootstrapModal.show();
+modal.removeAttribute("aria-hidden"); // ✅ yeh add karo
+
 
     modal.addEventListener('hidden.bs.modal', () => {
       document.body.removeChild(modal);
@@ -918,7 +932,6 @@
   function updateAd(index) {
     const ads = JSON.parse(localStorage.getItem('ads')) || [];
     const ad = ads[index];
-
     const title = document.getElementById('editAdTitle').value;
     const content = document.getElementById('editAdContent').value;
     const newImageFile = document.getElementById('editAdImage').files[0];
@@ -944,6 +957,7 @@
       alert("Advertisement updated!");
       bootstrap.Modal.getInstance(document.querySelector('.modal')).hide();
       loadAds();
+      displayActiveAd(); // <-- New Function Call
     };
 
     if (newImageFile) {
@@ -964,8 +978,68 @@
       ads.splice(index, 1);
       localStorage.setItem('ads', JSON.stringify(ads));
       loadAds();
+      displayActiveAd(); // <-- New Function Call
     }
   }
+
+  // NEW: Display active ad on main page
+
+ function displayActiveAd() {
+  const ads = JSON.parse(localStorage.getItem('ads')) || [];
+  const activeAd = ads.find(ad => ad.status?.toLowerCase() === 'active');
+  const adContainer = document.getElementById('activeAdContainer');
+  if (!adContainer) return;
+
+  adContainer.innerHTML = '';
+
+  if (activeAd) {
+    adContainer.innerHTML = `
+      <a href="${activeAd.url || '#'}" target="_blank" style="text-decoration: none; color: inherit;">
+        <div class="ad-item" style="text-align: center;">
+          <img src="${activeAd.image}" alt="Ad" style="max-width: 100%; height: auto; border-radius: 10px;" />
+          <p style="margin-top: 10px; font-weight: bold;">${activeAd.title}</p>
+          <p>${activeAd.content}</p>
+        </div>
+      </a>
+    `;
+  } else {
+    adContainer.innerHTML = `<span class="ad-text">🎮 Your Ad Here - Premium Gaming Experience</span>`;
+  }
+}
+
+
+//   function displayActiveAd() {
+//   const ads = JSON.parse(localStorage.getItem('ads')) || [];
+//   console.log("All ads from localStorage:", ads); // 👈 Add this line for testing
+
+//   const activeAd = ads.find(ad => ad.status?.toLowerCase() === 'active');
+//   console.log("Active Ad:", activeAd); // 👈 Check if it's null or valid
+
+//   const adContainer = document.getElementById('activeAdContainer');
+//   if (!adContainer) return;
+
+//   adContainer.innerHTML = '';
+
+//   if (activeAd) {
+//     adContainer.innerHTML = `
+//       <a href="${activeAd.url || '#'}" target="_blank" style="text-decoration: none; color: inherit;">
+//         <div class="ad-item" style="text-align: center;">
+//           <img src="${activeAd.image}" alt="Ad" style="max-width: 100%; height: auto; border-radius: 10px;" />
+//           <p style="margin-top: 10px; font-weight: bold;">${activeAd.title}</p>
+//           <p>${activeAd.content}</p>
+//         </div>
+//       </a>
+//     `;
+//   } else {
+//     adContainer.innerHTML = `<span class="ad-text">🎮 Your Ad Here - Premium Gaming Experience</span>`;
+//   }
+// }
+
+  // Initialize
+  window.onload = () => {
+    loadAds();
+    displayActiveAd(); // <-- Display when page loads
+  };
 
         
 

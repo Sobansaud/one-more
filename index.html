@@ -62,11 +62,66 @@
     </style>
 
     <!-- Top Ad Banner -->
-    <div class="ad-banner">
+    <!-- <div class="ad-banner">
       <div class="ad-content">
         <span class="ad-text">🎮 Your Ad Here - Premium Gaming Experience</span>
       </div>
-    </div>
+    </div> -->
+
+    <!-- Ad Banner Section -->
+<div class="ad-banner">
+  <div class="ad-content" id="activeAdContainer">
+    <!-- Ad Row Container -->
+<!-- <div id="activeAdRow" style="max-width: 1000px; margin: 20px auto;"></div> -->
+<div id="activeAdRow" style="margin: 20px 0;"></div>
+
+
+    <!-- Active ad will show here -->
+    <!-- <span class="ad-text">🎮 Your Ad Here</span> -->
+  </div>
+</div>
+
+
+<script>
+  function displayActiveAd() {
+    const ads = JSON.parse(localStorage.getItem('ads')) || [];
+    const activeAd = ads.find(ad => ad.status?.toLowerCase() === 'active');
+    const adRow = document.getElementById('activeAdRow');
+    if (!adRow) return;
+
+    adRow.innerHTML = '';
+
+    if (activeAd) {
+      adRow.innerHTML = `
+      <a href="${activeAd.url || '#'}" target="_blank" style="text-decoration: none; color: inherit; width: 100%;">
+
+          <div style="
+            display: flex;
+            align-items: center;
+            // background: #f8f9fa;
+            padding: 15px 20px;
+            // border: 1px solid black;
+            // border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+            gap: 200px;
+          ">
+            <span style="font-weight: bold; font-size: 20px; white-space: nowrap;">${activeAd.title}</span>
+            <span style="flex: 1; font-size: 20px; color: #333;">${activeAd.content}</span>
+            <img src="${activeAd.image}" alt="Ad" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;" />
+          </div>
+        </a>
+      `;
+    } else {
+      adRow.innerHTML = `<div style="text-align: center; color: gray;">No active ad available</div>`;
+    }
+  }
+
+  window.onload = () => {
+    displayActiveAd();
+  };
+</script>
+
+
 
     <div class="container">
         <div class="header">
